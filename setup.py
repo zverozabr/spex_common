@@ -22,6 +22,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires=">=3.9",
     install_requires=[
-        "python-dotenv>=0.15.0",
+        "python-dotenv==0.15.0",
+        "python-arango==7.1.0",
+        "redis==3.5.3",
+        "ujson==4.0.2"
     ]
 )
