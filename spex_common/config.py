@@ -9,6 +9,8 @@ int_keys = ['MAX_CONTENT_LENGTH']
 def load_config(mode='', update_environ=True, working_dir=getcwd()):
     mode = environ.get('MODE', mode)
 
+    print(f'uses MODE={mode}')
+
     file = f'.{mode}' if mode else ''
 
     file = path.join(
