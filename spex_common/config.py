@@ -6,7 +6,7 @@ falses = ['false', 'no']
 int_keys = ['MAX_CONTENT_LENGTH']
 
 
-def load(mode='', update_environ=True):
+def load_config(mode='', update_environ=True):
     mode = environ.get('MODE', mode)
 
     file = f'.{mode}' if mode else ''

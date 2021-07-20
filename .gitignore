@@ -11,3 +11,4 @@
 *.iws
 *key
 *key.pub
+*.egg-info/
