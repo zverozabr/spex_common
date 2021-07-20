@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="spex-common",
+    name="spex_common",
     version="0.1",
     author="Artem Zubkov",
     author_email="zubkov.artem@gene.com",
@@ -25,6 +25,7 @@ setuptools.setup(
         "pymemcache==3.4.1",
         "python-dotenv==0.15.0",
         "python-arango==7.1.0",
+        "requests==2.25.1",
         "redis==3.5.3",
         "ujson==4.0.2"
     ]

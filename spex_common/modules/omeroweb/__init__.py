@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from urllib import parse
 from os import getenv
-from ...models import OmeroSession
+from ...models.OmeroSession import OmeroSession
 from ..cache import cache_instance
 
 

@@ -2,7 +2,7 @@
 import os
 # import config
 import unittest
-from ...models import OmeroSession
+from ...models.OmeroSession import OmeroSession
 from ..cache import cache_instance
 from . import create
 os.environ['MODE'] = 'test'
