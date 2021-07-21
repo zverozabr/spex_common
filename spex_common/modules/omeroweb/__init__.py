@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from urllib import parse
 from os import getenv
 from ...models.OmeroSession import OmeroSession
 from ..cache import cache_instance
@@ -16,7 +15,7 @@ def get_active_until():
     return datetime.now() + timedelta(hours=int(getenv('MEMCACHED_SESSION_ALIVE_H')))
 
 
-def _login_omero_web(login, password, server='1'):
+def _login_omero_web(login, password, server='1') -> OmeroSession or None:
     client = OmeroSession(active_until=get_active_until())
 
     response = client.get('/api/v0/token/')
@@ -55,19 +54,15 @@ def _login_omero_web(login, password, server='1'):
     return get(login)
 
 
-def get(login):
+def get(login) -> OmeroSession or None:
     session = cache_instance().get(get_key(login))
 
-    if not session:
+    if not (session and isinstance(session, OmeroSession)):
         return None
 
     timestamp = int(datetime.timestamp(datetime.now()) * 1000)
 
     url = f'/webclient/keepalive_ping/?_={timestamp}'
-    result = parse.urlparse(url)
-
-    if not result.netloc or not result.scheme:
-        url = parse.urljoin(getenv("OMERO_WEB"), url)
     response = session.get(url)
 
     if response.status_code == 200 and response.content.decode('utf8').lower() != 'connection failed':
@@ -78,7 +73,7 @@ def get(login):
     return None
 
 
-def create(login, password):
+def create(login, password) -> OmeroSession or None:
     return _login_omero_web(login, password)
 
 

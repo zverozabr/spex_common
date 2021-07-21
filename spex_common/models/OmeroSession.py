@@ -1,6 +1,7 @@
 from os import getenv
 from urllib import parse
 from requests import Session
+import warnings
 
 
 class OmeroSession(Session):
@@ -26,8 +27,13 @@ class OmeroSession(Session):
     def request(self, method: str, url: str, **kwargs):
         result = parse.urlparse(url)
 
-        if not result.netloc or not result.scheme:
-            url = parse.urljoin(getenv("OMERO_WEB"), url)
+        omero_web_url = getenv("OMERO_WEB")
+
+        if not omero_web_url:
+            warnings.warn('OMERO_WEB is not defined in env')
+
+        if omero_web_url and not (result.netloc and result.scheme):
+            url = parse.urljoin(omero_web_url, url)
 
         return super(OmeroSession, self).request(
             method,
