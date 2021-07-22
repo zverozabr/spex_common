@@ -2,10 +2,10 @@ from os import getenv
 from pymemcache.client.base import PooledClient
 from pymemcache import serde
 
-__instance: PooledClient = None
+__instance: PooledClient or None = None
 
 
-def cache_instance():
+def cache_instance() -> PooledClient:
     global __instance
     if __instance is None:
         __instance = PooledClient(

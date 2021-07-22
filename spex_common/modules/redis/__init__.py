@@ -1,10 +1,10 @@
 from os import getenv
 from .model import Redis
 
-__instance: Redis = None
+__instance: Redis or None = None
 
 
-def redis_instance():
+def redis_instance() -> Redis:
     global __instance
     if __instance is None:
         __instance = Redis(

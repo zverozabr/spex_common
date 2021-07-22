@@ -1,10 +1,10 @@
 from os import getenv
 from .model import ArangoDB
 
-__instance: ArangoDB = None
+__instance: ArangoDB or None = None
 
 
-def db_instance():
+def db_instance() -> ArangoDB:
     global __instance
     if __instance is None:
         __instance = ArangoDB(
