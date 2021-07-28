@@ -1,1 +1,1 @@
-# Common library for SPEX
+# Common library for SPEX.
