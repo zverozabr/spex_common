@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pymemcache = "3.4.1"
-python-arango = "7.1.0"
-python-dotenv = "0.15.0"
-requests = "2.25.1"
-redis = "3.5.3"
-ujson = "4.0.2"
+pymemcache = "==3.5.0"
+python-arango = "==7.1.0"
+python-dotenv = "==0.15.0"
+requests = "==2.26.0"
+redis = "==3.5.3"
+ujson = "==4.0.2"
 
 [dev-packages]
 
