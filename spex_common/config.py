@@ -24,8 +24,11 @@ def load_config(mode='', update_environ=True, working_dir=getcwd()):
     }
 
     for key, value in config.items():
+        if value is None and environ[key] is not None:
+            config[key] = environ[key]
+
         if update_environ:
-            environ[key] = value
+            environ[key] = value if value is not None else environ[key]
 
         if value:
             if type(value) is str and value.lower() in trues:
