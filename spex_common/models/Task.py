@@ -5,6 +5,7 @@ class Task:
         self.omeroId = kwargs.get('omeroId', '')
         self.author = kwargs.get('author', '')
         self.parent = kwargs.get('parent', '')
+        self.params = kwargs.get('params', {})
         self.status = kwargs.get('status', 0)
         self.id = kwargs.get('_key', '')
         self._id = kwargs.get('_id', '')
@@ -18,6 +19,7 @@ class Task:
             'content': self.content,
             'author': self.author,
             'parent': self.parent,
+            'params': self.params,
             'status': self.status,
             'csvdata': self.csvdata,
             'id': self.id,
