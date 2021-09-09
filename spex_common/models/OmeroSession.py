@@ -18,6 +18,8 @@ class OmeroSession(Session):
         self.omero_context = context
         self.active_until = active_until
 
+        self.verify = False
+
         if session_id:
             self.cookies.setdefault('sessionid', session_id)
 
