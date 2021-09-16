@@ -11,6 +11,7 @@ class Task:
         self._id = kwargs.get('_id', '')
         self.csvdata = kwargs.get('csvdata', [])
         self.impath = kwargs.get('impath', '')
+        self.result = kwargs.get('result', '')
 
     def to_json(self):
         return {
@@ -24,7 +25,8 @@ class Task:
             'csvdata': self.csvdata,
             'id': self.id,
             '_id': self._id,
-            'impath': self.impath
+            'impath': self.impath,
+            'result': self.result
         }
 
 
