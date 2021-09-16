@@ -11,12 +11,17 @@ class OmeroSession(Session):
             'omero_session_id',
             'omero_token',
             'omero_context',
+            'omero_web_url',
             'active_until'
         ])
         self.omero_session_id = session_id
         self.omero_token = token
         self.omero_context = context
+        self.omero_web_url = getenv("OMERO_WEB")
         self.active_until = active_until
+
+        if not self.omero_web_url:
+            warnings.warn('OMERO_WEB is not defined in env')
 
         self.verify = False
 
@@ -29,16 +34,17 @@ class OmeroSession(Session):
     def request(self, method: str, url: str, **kwargs):
         result = parse.urlparse(url)
 
-        omero_web_url = getenv("OMERO_WEB")
-
-        if not omero_web_url:
+        if not self.omero_web_url:
             warnings.warn('OMERO_WEB is not defined in env')
 
-        if omero_web_url and not (result.netloc and result.scheme):
-            url = parse.urljoin(omero_web_url, url)
+        if self.omero_web_url and not (result.netloc and result.scheme):
+            url = parse.urljoin(self.omero_web_url, url)
 
         return super(OmeroSession, self).request(
             method,
             url,
             **kwargs
         )
+
+    def update_active_until(self, active_until):
+        self.active_until = active_until

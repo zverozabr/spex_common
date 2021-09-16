@@ -3,8 +3,7 @@ from os import getenv
 from ...models.OmeroSession import OmeroSession
 from ..cache import cache_instance
 
-
-__all__ = ['get', 'create', 'update_ttl']
+__all__ = ['get', 'create', 'update_ttl', 'get_key']
 
 
 def get_key(login):
@@ -12,7 +11,7 @@ def get_key(login):
 
 
 def get_active_until():
-    return datetime.now() + timedelta(hours=int(getenv('MEMCACHED_SESSION_ALIVE_H')))
+    return datetime.now() + timedelta(hours=int(getenv('MEMCACHED_SESSION_ALIVE_H', 12)))
 
 
 def _login_omero_web(login, password, server='1') -> OmeroSession or None:
@@ -83,11 +82,6 @@ def update_ttl(login):
     if session is None:
         return
 
-    session = OmeroSession(
-        session.omero_session_id,
-        session.omero_token,
-        session.omero_context,
-        datetime.now() + timedelta(hours=int(getenv('MEMCACHED_SESSION_ALIVE_H')))
-    )
+    session.update_active_until(get_active_until())
 
     cache_instance().set(get_key(login), session)
