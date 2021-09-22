@@ -32,6 +32,7 @@ def _login_omero_web(login, password, server='1') -> OmeroSession or None:
     url = '/api/v0/login/'
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Referer': f'{client.get_host()}/api/v0/login/',
         'X-CSRFToken': csrf_token
     }
     response = client.post(url, headers=headers, data=data)

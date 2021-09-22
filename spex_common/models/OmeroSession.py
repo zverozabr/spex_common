@@ -8,6 +8,7 @@ class OmeroSession(Session):
     def __init__(self, session_id=None, token=None, context=None, active_until=None):
         super().__init__()
         self.__attrs__.extend([
+            '__attrs__',
             'omero_session_id',
             'omero_token',
             'omero_context',
@@ -30,6 +31,9 @@ class OmeroSession(Session):
 
         if token:
             self.headers.setdefault('X-CSRFToken', token)
+
+    def get_host(self):
+        return self.omero_web_url
 
     def request(self, method: str, url: str, **kwargs):
         result = parse.urlparse(url)
