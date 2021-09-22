@@ -1,13 +1,15 @@
+from threading import main_thread
 import time
 import traceback
 
 
 def every(delay, task):
     next_time = time.time() + delay
-    while True:
+    while main_thread().is_alive():
         time.sleep(max(0, next_time - time.time()))
         try:
-            task()
+            if main_thread().is_alive():
+                task()
         except Exception:
             traceback.print_exc()
         #  in production code you might want to have this instead of course:
