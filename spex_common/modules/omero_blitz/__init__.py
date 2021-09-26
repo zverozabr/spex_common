@@ -19,12 +19,14 @@ def get_active_until():
 def _login_omero_blitz(login, password) -> OmeroBlitzSession or None:
     active_until = get_active_until()
 
-    client = BlitzGateway(login, password, host=getenv('OMERO_HOST'), secure=True)
+    host = getenv('OMERO_HOST')
+
+    client = BlitzGateway(login, password, host=host, secure=True)
     if client.connect():
         client.c.enableKeepAlive(60)
         session_id = client.getEventContext().sessionUuid
 
-        session = OmeroBlitzSession(session_id, active_until)
+        session = OmeroBlitzSession(session_id, active_until, host)
 
         cache_instance().set(get_key(login), session)
     else:

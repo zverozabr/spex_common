@@ -5,22 +5,20 @@ from omero.gateway import BlitzGateway
 class OmeroBlitzSession:
     _gateway: BlitzGateway or None = None
 
-    __attrs__ = ['_session_id', '_host', 'active_until']
-
-    def __init__(self, session_id, active_until, host=getenv("OMERO_HOST")):
-        self._session_id = session_id
-        self._host = host
+    def __init__(self, session_id, active_until, host):
+        self.session_id = session_id
+        self.host = host
         self.active_until = active_until
 
     def connect(self) -> bool:
-        if not self._host:
+        if not self.host:
             raise Exception("OmeroBlitzSession: host is not set")
 
-        if not self._session_id:
+        if not self.session_id:
             raise Exception("OmeroBlitzSession: session_id is not set")
 
-        self._gateway = BlitzGateway(self._session_id, self._session_id, host=self._host, secure=True)
-        if not self._gateway.connect(self._session_id):
+        self._gateway = BlitzGateway(self.session_id, self.session_id, host=self.host, secure=True)
+        if not self._gateway.connect(self.session_id):
             raise Exception("OmeroBlitzSession: can't connect")
 
         self._gateway.c.enableKeepAlive(60)
@@ -37,7 +35,7 @@ class OmeroBlitzSession:
         if not hard:
             ref_count = self._gateway.c.sf\
                 .getSessionService()\
-                .getReferenceCount(self._session_id)
+                .getReferenceCount(self.session_id)
             if ref_count < 2:
                 return
 
