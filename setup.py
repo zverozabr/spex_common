@@ -22,6 +22,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires=">=3.9",
     install_requires=[
+        "aioredis==2.0.0",
         "pymemcache==3.5.0",
         "python-dotenv==0.15.0",
         "python-arango==7.1.0",
