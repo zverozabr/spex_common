@@ -1,6 +1,6 @@
 from threading import main_thread
 import time
-import traceback
+from ..modules.logging import get_logger
 
 
 def every(delay, task):
@@ -11,7 +11,7 @@ def every(delay, task):
             if main_thread().is_alive():
                 task()
         except Exception:
-            traceback.print_exc()
+            get_logger('common.services.Timer').exception()
         #  in production code you might want to have this instead of course:
         #  logger.exception("Problem while executing repetitive task.")
         #  skip tasks if we are behind schedule:

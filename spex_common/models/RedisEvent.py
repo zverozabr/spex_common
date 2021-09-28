@@ -6,7 +6,7 @@ class RedisEvent:
     def __init__(self, type, data, id=None):
         self.type = type
         self.data = data
-        self.id = uuid.uuid4() if id is None else id
+        self.id = id or uuid.uuid4()
 
     def serialize(self):
         result = dumps(self)
