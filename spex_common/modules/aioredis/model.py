@@ -65,3 +65,10 @@ class AIORedisClient:
 
     def run(self):
         loop.run_until_complete(self.listen_for_events())
+
+    async def __close__(self):
+        await self.receiver.close()
+        await self.sender.close()
+
+    def close(self):
+        loop.run_until_complete(self.__close__())
