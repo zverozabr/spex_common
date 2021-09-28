@@ -1,6 +1,6 @@
 from os import path, environ, getcwd
 from dotenv import dotenv_values
-from modules.logging import get_logger
+from .modules.logging import get_logger
 
 trues = ['true', 'yes']
 falses = ['false', 'no']

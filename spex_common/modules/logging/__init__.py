@@ -29,7 +29,8 @@ def get_logger(name=''):
                 },
             }
         }
+        logging.captureWarnings(True)
         logging.config.dictConfig(config)
         __initialized = True
 
-    logging.getLogger(name)
+    return logging.getLogger(name)
