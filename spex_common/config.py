@@ -40,6 +40,6 @@ def load_config(mode='', update_environ=True, working_dir=getcwd()):
                 value = int(value)
                 config[key] = value
 
-    get_logger('common.config').info(f'uses MODE={mode}')
+    get_logger('spex.common.config').info(f'uses MODE={mode}')
 
     return config

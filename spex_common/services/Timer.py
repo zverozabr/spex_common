@@ -11,7 +11,7 @@ def every(delay, task):
             if main_thread().is_alive():
                 task()
         except Exception:
-            get_logger('common.services.Timer').exception()
+            get_logger('spex.common.services.Timer').exception()
         #  in production code you might want to have this instead of course:
         #  logger.exception("Problem while executing repetitive task.")
         #  skip tasks if we are behind schedule:
