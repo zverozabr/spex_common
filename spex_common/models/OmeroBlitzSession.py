@@ -39,4 +39,6 @@ class OmeroBlitzSession:
             if ref_count < 2:
                 return
 
+        if hard:
+            self._gateway.c.stopKeepAlive()
         self._gateway.close(hard)

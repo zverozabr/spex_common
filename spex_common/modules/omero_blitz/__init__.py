@@ -23,7 +23,8 @@ def _login_omero_blitz(login, password) -> OmeroBlitzSession or None:
 
     client = BlitzGateway(login, password, host=host, secure=True)
     if client.connect():
-        client.c.enableKeepAlive(60)
+        client.c.stopKeepAlive()
+        # client.c.enableKeepAlive(60)
         session_id = client.getEventContext().sessionUuid
 
         session = OmeroBlitzSession(session_id, active_until, host)
@@ -35,7 +36,7 @@ def _login_omero_blitz(login, password) -> OmeroBlitzSession or None:
     return get(login)
 
 
-def get(login) -> OmeroBlitzSession or None:
+def get(login, keep_alive=True) -> OmeroBlitzSession or None:
     session = cache_instance().get(get_key(login))
 
     if not (session and isinstance(session, OmeroBlitzSession)):
@@ -46,6 +47,9 @@ def get(login) -> OmeroBlitzSession or None:
             user = session.get_gateway().getUser()
 
             if user is not None:
+                if not keep_alive:
+                    session.get_gateway().c.stopKeepAlive()
+
                 return session
 
         cache_instance().delete(get_key(login))
