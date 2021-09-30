@@ -23,6 +23,7 @@ class OmeroImageFileManager:
         self.__dir = f'{os.getenv("DATA_STORAGE")}/originals/{omero_image_id}'
         self.__path = os.path.join(self.__dir, 'image')
         self.__lock_path = f'{self.__path}.lock'
+        self.__not_available_path = f'{self.__path}.lock'
         self.__chunk_path = f'{self.__path}.chunk'
         self.__omero_image_id = omero_image_id
 
@@ -140,6 +141,20 @@ class OmeroImageFileManager:
     def unlock(self):
         if self.is_locked():
             os.remove(self.__lock_path)
+        return self
+
+    def is_available(self):
+        return not os.path.exists(self.__not_available_path)
+
+    def make_not_available(self):
+        os.makedirs(self.__dir, exist_ok=True)
+        open(self.__not_available_path, 'a').close()
+        return self
+
+    def make_available(self):
+        if not self.is_available():
+            os.remove(self.__not_available_path)
+        return self
 
     def merge_chunks(self):
         if self.__chunk_size < 1:
