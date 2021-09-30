@@ -1,5 +1,6 @@
 import os
 import glob
+import re
 import threading
 import math
 from typing import BinaryIO
@@ -39,6 +40,9 @@ class OmeroImageFileManager:
         self.__chunk_size = chunk_size
         return self
 
+    def get_chunk_size(self):
+        return self.__chunk_size
+
     def exists(self) -> bool:
         return os.path.isfile(self.get_filename())
 
@@ -49,7 +53,7 @@ class OmeroImageFileManager:
         return os.path.getsize(self.get_filename())
 
     def get_filename(self) -> str:
-        return f'{self.__path}.ome.tiff'
+        return f'{self.__path}.tiff'
 
     def __get_tmp(self) -> str:
         return f'{self.get_filename()}.tmp'
@@ -76,7 +80,7 @@ class OmeroImageFileManager:
         if finished:
             suffix = f'*.finished'
         chunks = glob.glob(f'{self.__chunk_path}.{suffix}')
-        chunks.sort()
+        chunks.sort(key=lambda item: int(re.sub('\\D', '', item)))
         return chunks
 
     def calc_number_of_chunks(self) -> int:
@@ -157,21 +161,15 @@ class OmeroImageFileManager:
             return
 
         tmp_file = self.__get_tmp()
-        result = open(tmp_file, 'wb')
-        buffer_size = 1024*1024
-        try:
+        buffer_size = 1024*4096
+        with open(tmp_file, 'wb') as result:
             for chunk in chunks:
-                file = open(chunk, 'rb')
-                try:
+                with open(chunk, 'rb') as file:
                     while threading.current_thread().is_alive():
                         part = file.read(buffer_size)
                         if not part:
                             break
                         result.write(part)
-                finally:
-                    file.close()
-        finally:
-            result.close()
 
         size = os.path.getsize(tmp_file)
         if size == self.__expected_file_size:
