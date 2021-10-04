@@ -23,8 +23,8 @@ def _login_omero_blitz(login, password) -> OmeroBlitzSession or None:
 
     client = BlitzGateway(login, password, host=host, secure=True)
     if client.connect():
-        client.c.stopKeepAlive()
-        # client.c.enableKeepAlive(60)
+        # client.c.stopKeepAlive()
+        client.c.enableKeepAlive(60)
         session_id = client.getEventContext().sessionUuid
 
         session = OmeroBlitzSession(session_id, active_until, host)
