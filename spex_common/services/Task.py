@@ -78,7 +78,7 @@ def create_tasks(body, job) -> list[Task]:
             data = dict(body)
             data['omeroId'] = omeroId
             data['parent'] = parent
-            data['status'] = 0
+            data['status'] = -1
             del data['omeroIds']
 
             new_task = insert(data)
