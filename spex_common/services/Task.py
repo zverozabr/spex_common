@@ -61,29 +61,15 @@ def create_tasks(body, job) -> list[Task]:
     result = []
 
     for omeroId in body['omeroIds']:
-        arg = dict()
-        arg['name'] = body['name']
-        arg['content'] = body['content']
-        arg['params'] = body['params']
-        arg['omeroId'] = omeroId
+        data = dict(body)
+        data['omeroId'] = omeroId
+        data['parent'] = parent
+        data['status'] = -1
+        del data['omeroIds']
 
-        tasks = select_tasks(**arg)
-
-        if tasks is None:
-            tasks = []
-
-        if len(tasks) > 0:
-            result.append(tasks[0])
-        else:
-            data = dict(body)
-            data['omeroId'] = omeroId
-            data['parent'] = parent
-            data['status'] = -1
-            del data['omeroIds']
-
-            new_task = insert(data)
-            if new_task is not None:
-                result.append(new_task.to_json())
+        new_task = insert(data)
+        if new_task is not None:
+            result.append(new_task.to_json())
 
     for item in result:
         db_instance().insert_edge('jobs_tasks', _from=job._id, _to=item.get('_id'))
