@@ -60,7 +60,9 @@ def create_tasks(body, job) -> list[Task]:
     parent = job.id
     result = []
 
-    if 'omeroIds' in list(body.keys()) and len(body['omeroIds']):
+    body = dict(body)
+
+    if 'omeroIds' in body and len(body['omeroIds']) > 0:
         for omeroId in body['omeroIds']:
             data = dict(body)
             data['omeroId'] = omeroId
