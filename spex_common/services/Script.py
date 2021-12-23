@@ -47,13 +47,13 @@ def get_script_structure(script_name: str = None):
             if stage is None:
                 continue
 
-            state = int(state) - 1
+            stage = int(stage) - 1
 
-            if state >= len(stages[state]):
-                for index in range(state - len(stages) + 1):
+            if stage >= len(stages[stage]):
+                for index in range(stage - len(stages) + 1):
                     stages.append({'name': f'{len(stages)}', 'scripts': []})
 
-            stages[state]['scripts'].append(data)
+            stages[stage]['scripts'].append(data)
 
     result.update({'stages': stages})
 

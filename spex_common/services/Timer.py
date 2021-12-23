@@ -2,6 +2,7 @@ from threading import main_thread
 import time
 from ..modules.logging import get_logger
 
+logger = get_logger('spex.common.services.Timer')
 
 def every(delay, task):
     next_time = time.time() + delay
@@ -11,7 +12,7 @@ def every(delay, task):
             if main_thread().is_alive():
                 task()
         except Exception:
-            get_logger('spex.common.services.Timer').exception()
+            logger.exception("Timer problem")
         #  in production code you might want to have this instead of course:
         #  logger.exception("Problem while executing repetitive task.")
         #  skip tasks if we are behind schedule:
