@@ -82,15 +82,6 @@ class ArangoDB:
     def insert(self, collection, data, overwrite_mode=None):
         return self.instance.insert_document(collection, data, True, overwrite_mode=overwrite_mode)
 
-    def select(self, collection, search='', fields='doc', **kwargs):
-        task = self.async_instance.aql.execute(
-            f'FOR doc IN {collection} {search} RETURN {fields}',
-            bind_vars={
-                **kwargs
-            }
-        )
-        return receive_async_response(task)
-
     def query(self, query, **kwargs):
         task = self.async_instance.aql.execute(
             query,
@@ -99,6 +90,12 @@ class ArangoDB:
             }
         )
         return receive_async_response(task)
+
+    def select(self, collection, search='', fields='doc', **kwargs):
+        return self.query(
+            f'FOR doc IN {collection} {search} RETURN {fields}',
+            **kwargs
+        )
 
     def update(self, collection, data, search='', **kwargs):
         task = self.async_instance.aql.execute(

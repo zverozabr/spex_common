@@ -11,12 +11,14 @@ def select(id, collection=collectionName, to_json=False, one=False):
     search = 'FILTER doc._key == @value LIMIT 1'
     items = db_instance().select(collection, search, value=id)
 
-    def to_json(item):
-        return pipeline(item).to_json()
+    def transform(item):
+        item = pipeline(item)
+        return item.to_json() if to_json else item
 
     if one:
-        return first_or_none(items, to_json)
-    return map_or_none(items, lambda item: (pipeline(item).to_json() if to_json else pipeline(item)))
+        return first_or_none(items, transform)
+
+    return map_or_none(items, transform)
 
 
 def select_pipeline(condition=None, collection=collectionName, one=False, **kwargs):
@@ -29,13 +31,9 @@ def select_pipeline(condition=None, collection=collectionName, one=False, **kwar
     def to_json(_item):
         return pipeline(_item).to_json()
 
-    if one:
-        item = first_or_none(items, pipeline)
-        if item is not None:
-            item = item.to_json()
-        return item
-
-    return map_or_none(items, to_json)
+    return first_or_none(items, to_json) \
+        if one \
+        else map_or_none(items, to_json)
 
 
 def select_pipeline_edge(_key):
@@ -75,27 +73,45 @@ def count():
 
 
 def recursion_query(itemid, tree, _depth, pipeline_id):
+    text = f"""
+FOR doc IN jobs
+FILTER doc._id == @itemid
+RETURN {{
+    "id": doc._key, 
+    "name": doc.name, 
+    "status": doc.status
+    "jobs": (
+        FOR item IN pipeline_direction 
+        FILTER item._from == @itemid 
+            && item.pipeline == @pipeline_id 
+        RETURN {{
+            "name": item.name, 
+            "_id": SUBSTITUTE(item._to, "jobs/", ""), 
+            "status": item.complete 
+        }}
+    )
+}}
+"""
 
-    text = 'FOR d IN jobs ' + \
-           f'FILTER d._id == "{itemid}" ' + \
-           'LET jobs = (' + \
-           f'FOR b IN pipeline_direction FILTER b._from ==  "{itemid}" && b.pipeline == "{pipeline_id}" RETURN  ' + '{"name": b.name, "_id": SUBSTITUTE(b._to, "jobs/",""), "status": b.complete } )' + \
-           ' RETURN MERGE({"id": d._key, "name": d.name, "status": d.status}, {"jobs": jobs})'
+    result = db_instance().query(text, itemid=itemid, pipeline_id=pipeline_id)
 
-    result = db_instance().query(text)
-    if len(result) > 0:
-        tree = result[0]
-        tree['tasks'] = TaskService.select_tasks_edge(itemid)
-    else:
+    if not result:
         return tree
 
+    tree = result[0]
+    tree['tasks'] = TaskService.select_tasks_edge(itemid)
+
     i = 0
-    if _depth < 50:
-        if result[0]['jobs'] is not None and len(result[0]['jobs']) > 0:
-            while i < len(result[0]['jobs']):
-                _id = 'jobs/' + result[0]['jobs'][i]['_id']
-                tree['jobs'][i] = recursion_query(_id, tree['jobs'][i], _depth + 1, pipeline_id)
-                i += 1
+    if _depth < 50 and tree.get('jobs'):
+        for index, job in enumerate(tree['jobs']):
+            _id = f'jobs/{job["_id"]}'
+            tree['jobs'][i] = recursion_query(
+                _id,
+                job,
+                _depth + 1,
+                pipeline_id
+            )
+
     return tree
 
 
@@ -109,13 +125,17 @@ def depth(x):
 
 def get_jobs(x):
     jobs = []
-    if type(x) is list and x:
-        for job in x:
-            if job is None:
-                return jobs
-            jobs.append('jobs/'+job.get('id'))
-            if job.get('jobs') is not None:
-                jobs = jobs + get_jobs(job.get('jobs'))
+    if not isinstance(x, list):
+        return jobs
+
+    for job in x:
+        if job is None:
+            continue
+
+        jobs.append(f'jobs/{job.get("id")}')
+
+        jobs = jobs + get_jobs(job.get('jobs'))
+
     return jobs
 
 
