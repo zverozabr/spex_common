@@ -8,7 +8,7 @@ class Job:
         self.author = kwargs.get('author', '')
         self.status = kwargs.get('status', 0)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             'id': self.id,
             'name': self.name,

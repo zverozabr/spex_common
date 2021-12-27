@@ -15,7 +15,7 @@ def select(id, collection='jobs') -> Job or None:
     return first_or_none(items, job)
 
 
-def select_jobs(collection='jobs', condition=None, **kwargs) -> list[Job] or None:
+def select_jobs(collection='jobs', condition=None, **kwargs) -> list[dict] or None:
     search = db_instance().get_search(**kwargs)
     if condition is not None and search:
         search = search.replace('==',  condition)
@@ -44,7 +44,12 @@ def delete_connection(condition=None, collection='jobs_tasks', **kwargs) -> Job 
     return first_or_none(items, job)
 
 
-def select_connections(condition=None, collection="jobs_tasks", one=False, **kwargs):
+def select_connections(
+    condition=None,
+    collection="jobs_tasks",
+    one=False,
+    **kwargs
+) -> list[dict] or dict or None:
     search = db_instance().get_search(**kwargs)
     if condition is not None and search:
         search = search.replace('==',  condition)
@@ -70,7 +75,7 @@ def count(collection='jobs') -> int:
     return arr[0]
 
 
-def update_job(id, data):
+def update_job(id, data) -> dict or None:
     _job = update(id=id, data=data)
 
     if _job is None:
@@ -83,7 +88,7 @@ def update_job(id, data):
     updated_tasks = []
 
     for item in tasks:
-        item = TaskService.update(item.id, data)
+        item = TaskService.update(item['id'], data)
         updated_tasks.append(item.to_json())
     _job['tasks'] = updated_tasks
 

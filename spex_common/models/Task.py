@@ -13,7 +13,7 @@ class Task:
         self.impath = kwargs.get('impath', '')
         self.result = kwargs.get('result', '')
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             'omeroId': self.omeroId,
             'name': self.name,

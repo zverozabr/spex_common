@@ -12,7 +12,7 @@ def select(_id, collection=_collectionName) -> Task:
     return first_or_none(items, task)
 
 
-def select_tasks(condition=None, collection=_collectionName, **kwargs) -> list[Task]:
+def select_tasks(condition=None, collection=_collectionName, **kwargs) -> list[dict]:
     search = db_instance().get_search(**kwargs)
     if condition is not None and search:
         search = search.replace('==',  condition)
@@ -20,7 +20,7 @@ def select_tasks(condition=None, collection=_collectionName, **kwargs) -> list[T
     return map_or_none(items, lambda item: task(item).to_json())
 
 
-def select_tasks_edge(_key) -> list[Task]:
+def select_tasks_edge(_key) -> list[dict]:
     items = db_instance().select_edge(collection='jobs_tasks', inbound=False, _key=_key)
 
     if len(items) < 1:
@@ -56,7 +56,7 @@ def count() -> int:
     return int(arr[0])
 
 
-def create_tasks(body, job) -> list[Task]:
+def create_tasks(body, job) -> list[dict]:
     parent = job.id
     result = []
 
@@ -81,8 +81,11 @@ def create_tasks(body, job) -> list[Task]:
         if new_task:
             result.append(new_task.to_json())
 
-
     for item in result:
-        db_instance().insert_edge('jobs_tasks', _from=job._id, _to=item.get('_id'))
+        db_instance().insert_edge(
+            'jobs_tasks',
+            _from=job._id,
+            _to=item.get('_id')
+        )
 
     return result
