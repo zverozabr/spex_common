@@ -6,7 +6,7 @@ import os
 def scripts_list():
     folder = os.path.join(os.getenv('DATA_STORAGE'), 'Scripts', '*', '')
     return [
-        os.path.basename(script) for script in glob(folder)
+        os.path.basename(os.path.dirname(script)) for script in glob(folder)
         if os.path.isfile(os.path.join(script, 'manifest.json'))
     ]
 
@@ -26,6 +26,8 @@ def get_script_structure(script_name: str = None):
         return {}
 
     result = data
+
+    result.update(key=script_name)
 
     stages = result.get('stages')
 
