@@ -6,7 +6,7 @@ import os
 def scripts_list():
     folder = os.path.join(os.getenv('DATA_STORAGE'), 'Scripts', '*', '')
     return [
-        script for script in glob(folder)
+        os.path.basename(script) for script in glob(folder)
         if os.path.isfile(os.path.join(script, 'manifest.json'))
     ]
 
