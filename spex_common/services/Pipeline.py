@@ -73,27 +73,31 @@ def count():
 
 
 def recursion_query(itemid, tree, _depth, pipeline_id):
-    text = f"""
+    query = f"""
 FOR doc IN jobs
 FILTER doc._id == @itemid
 RETURN {{
-    "id": doc._key, 
-    "name": doc.name, 
-    "status": doc.status
-    "jobs": (
+    id: doc._key, 
+    name: doc.name, 
+    status: doc.status,
+    jobs: (
         FOR item IN pipeline_direction 
         FILTER item._from == @itemid 
             && item.pipeline == @pipeline_id 
         RETURN {{
-            "name": item.name, 
-            "_id": SUBSTITUTE(item._to, "jobs/", ""), 
-            "status": item.complete 
+            name: item.name, 
+            _id: SUBSTITUTE(item._to, "jobs/", ""), 
+            status: item.complete 
         }}
     )
 }}
 """
 
-    result = db_instance().query(text, itemid=itemid, pipeline_id=pipeline_id)
+    result = db_instance().query(
+        query,
+        itemid=itemid,
+        pipeline_id=pipeline_id
+    )
 
     if not result:
         return tree
