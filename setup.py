@@ -22,11 +22,13 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires=">=3.9",
     install_requires=[
+        "aioredis==2.0.0",
         "pymemcache==3.5.0",
         "python-dotenv==0.15.0",
         "python-arango==7.1.0",
         "requests==2.26.0",
         "redis==3.5.3",
-        "ujson==4.0.2"
+        "ujson==4.0.2",
+        "omero-py==5.9.1"
     ]
 )

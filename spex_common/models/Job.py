@@ -6,15 +6,17 @@ class Job:
         self.content = kwargs.get('content', '')
         self.omeroIds = kwargs.get('omeroIds', [])
         self.author = kwargs.get('author', '')
+        self.status = kwargs.get('status', 0)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             'id': self.id,
             'name': self.name,
             'content': self.content,
             'author': self.author,
             'omeroIds': self.omeroIds,
-            '_id': self._id
+            '_id': self._id,
+            'status': self.status,
          }
 
 
