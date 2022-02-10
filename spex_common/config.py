@@ -7,19 +7,36 @@ falses = ['false', 'no']
 int_keys = ['MAX_CONTENT_LENGTH']
 
 
+def _get_config(mode, working_dir):
+    main = f'.{mode}' if mode else ''
+
+    main = path.join(
+        working_dir if working_dir is not None else path.dirname(__file__),
+        f'.env{main}'
+    )
+    local = f'{main}.local'
+
+    config = {}
+
+    if path.exists(main):
+        config = {**dotenv_values(main)}
+
+    if path.exists(local):
+        config = {
+            **config,
+            **dotenv_values(local)
+        }
+
+    return config
+
+
 def load_config(mode='', update_environ=True, working_dir=getcwd()):
     mode = environ.get('MODE', mode)
 
-    file = f'.{mode}' if mode else ''
-
-    file = path.join(
-        working_dir if working_dir is not None else path.dirname(__file__),
-        f'.env{file}'
-    )
-    local = f'{file}.local'
-
     config = {
-        **dotenv_values(local if path.exists(local) else file)
+        **environ.copy(),
+        **_get_config('', working_dir),
+        **_get_config(mode, working_dir),
     }
 
     for key, value in config.items():
