@@ -7,7 +7,7 @@ falses = ['false', 'no']
 int_keys = ['MAX_CONTENT_LENGTH']
 
 
-def _get_config(mode, working_dir):
+def _get_config(working_dir, mode=None):
     main = f'.{mode}' if mode else ''
 
     main = path.join(
@@ -35,8 +35,8 @@ def load_config(mode='', update_environ=True, working_dir=getcwd()):
 
     config = {
         **environ.copy(),
-        **_get_config('', working_dir),
-        **_get_config(mode, working_dir),
+        **_get_config(working_dir),
+        **_get_config(working_dir, mode),
     }
 
     for key, value in config.items():
