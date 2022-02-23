@@ -28,15 +28,20 @@ class Redis:
         else:
             return None
 
-    def get_keys(self, search, **kwargs):
-        keys = self.client.execute_command('keys ' + search, **kwargs)
-        return keys
-
-    def update(self, collection, data, search='', **kwargs):
-        print('update')
-
-    def delete(self, collection, search='', **kwargs):
+    def remove(self, collection):
         return self.client.execute_command('JSON.DEL', collection)
 
-    def count(self, search='*', **kwargs):
-        return self.client.execute_command('KEYS', search)
+    def get(self, key):
+        return self.client.get(key)
+
+    def set(self, key, value, **kwargs):
+        return self.client.set(key, value, **kwargs)
+
+    def delete(self, *keys):
+        return self.client.delete(*keys)
+
+    def keys(self, pattern='*'):
+        return self.client.keys(pattern)
+
+    def count(self, search='*'):
+        return len(self.keys(search))

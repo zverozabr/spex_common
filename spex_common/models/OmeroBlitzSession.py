@@ -1,8 +1,9 @@
 from os import getenv
 from omero.gateway import BlitzGateway
+from .Serializable import Serializable
 
 
-class OmeroBlitzSession:
+class OmeroBlitzSession(Serializable):
     _gateway: BlitzGateway or None = None
 
     def __init__(self, session_id, active_until, host):

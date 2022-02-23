@@ -1,10 +1,11 @@
 from os import getenv
 from urllib import parse
 from requests import Session
+from .Serializable import Serializable
 import warnings
 
 
-class OmeroSession(Session):
+class OmeroSession(Session, Serializable):
     def __init__(self, session_id=None, token=None, context=None, active_until=None):
         super().__init__()
         self.__attrs__.extend([
