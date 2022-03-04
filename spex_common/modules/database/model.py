@@ -73,6 +73,8 @@ class ArangoDB:
             db.create_collection('box')
         if not db.has_collection('pipeline'):
             db.create_collection('pipeline')
+        if not db.has_collection('history'):
+            db.create_collection('history')
         if not db.has_collection('pipeline_direction'):
             db.create_collection('pipeline_direction', edge=True)
         if not db.has_graph('pipeline'):
