@@ -2,6 +2,7 @@ from enum import IntEnum
 
 
 class Text(IntEnum):
+    failed = -3
     pending_approval = -2
     error = -1
     started = 0
@@ -9,8 +10,15 @@ class Text(IntEnum):
     complete = 100
 
     @classmethod
-    def from_status(cls, status):
+    def from_status(cls, status) -> str:
         try:
             return cls(status).name
         except ValueError:
             return "other"
+
+    @classmethod
+    def from_str(cls, status) -> int:
+        try:
+            return cls(status).value
+        except ValueError:
+            return -3
