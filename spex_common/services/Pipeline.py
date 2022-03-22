@@ -136,9 +136,9 @@ def get_jobs(x, prefix=True):
         if job is None:
             continue
         if not prefix:
-            jobs.append(job.get("id"))
+            jobs.append(job.get("_id", job.get("id")))
         else:
-            jobs.append(f'jobs/{job.get("id")}')
+            jobs.append(f'jobs/{job.get("_id", job.get("id"))}')
 
         jobs = jobs + get_jobs(job.get('jobs'), prefix)
 
