@@ -1,3 +1,6 @@
+from spex_common.models.Status import PipelineText as Text
+
+
 class Pipeline:
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
@@ -18,7 +21,8 @@ class Pipeline:
             'status': self.status,
             'id': self.id,
             '_id': self._id,
-            'project': self.project
+            'project': self.project,
+            'status_name': Text.from_status(self.status)
         }
 
 
