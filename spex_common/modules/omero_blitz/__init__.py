@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from os import getenv
 from omero.gateway import BlitzGateway
 from ...models.OmeroBlitzSession import OmeroBlitzSession
-from ..cache import cache_instance
+from ..redis import redis_instance
 
 __all__ = ['get', 'create', 'update_ttl', 'get_key']
 
@@ -13,7 +13,7 @@ def get_key(login):
 
 
 def get_active_until():
-    return datetime.now() + timedelta(hours=int(getenv('MEMCACHED_SESSION_ALIVE_H', 12)))
+    return datetime.now() + timedelta(hours=int(getenv('REDIS_SESSION_ALIVE_H', 12)))
 
 
 def _login_omero_blitz(login, password) -> OmeroBlitzSession or None:
@@ -22,24 +22,25 @@ def _login_omero_blitz(login, password) -> OmeroBlitzSession or None:
     host = getenv('OMERO_HOST')
 
     client = BlitzGateway(login, password, host=host, secure=True)
+
     if client.connect():
         # client.c.stopKeepAlive()
         client.c.enableKeepAlive(60)
         session_id = client.getEventContext().sessionUuid
 
         session = OmeroBlitzSession(session_id, active_until, host)
-
-        cache_instance().set(get_key(login), session)
+        redis_instance().set(get_key(login), session.serialize())
     else:
-        cache_instance().delete(get_key(login))
+        redis_instance().delete(get_key(login))
 
     return get(login)
 
 
 def get(login, keep_alive=True) -> OmeroBlitzSession or None:
-    session = cache_instance().get(get_key(login))
+    session = redis_instance().get(get_key(login))
+    session = OmeroBlitzSession.deserialize(session)
 
-    if not (session and isinstance(session, OmeroBlitzSession)):
+    if not isinstance(session, OmeroBlitzSession):
         return None
 
     try:
@@ -52,7 +53,7 @@ def get(login, keep_alive=True) -> OmeroBlitzSession or None:
 
                 return session
 
-        cache_instance().delete(get_key(login))
+        redis_instance().delete(get_key(login))
     except Exception:
         traceback.print_exc()
 

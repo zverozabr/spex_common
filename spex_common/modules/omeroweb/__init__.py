@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from os import getenv
 from ...models.OmeroSession import OmeroSession
-from ..cache import cache_instance
+from ..redis import redis_instance
+
 
 __all__ = ['get', 'create', 'update_ttl', 'get_key']
 
@@ -11,7 +12,7 @@ def get_key(login):
 
 
 def get_active_until():
-    return datetime.now() + timedelta(hours=int(getenv('MEMCACHED_SESSION_ALIVE_H', 12)))
+    return datetime.now() + timedelta(hours=int(getenv('REDIS_SESSION_ALIVE_H', 12)))
 
 
 def _login_omero_web(login, password, server='1') -> OmeroSession or None:
@@ -47,17 +48,18 @@ def _login_omero_web(login, password, server='1') -> OmeroSession or None:
             get_active_until()
         )
 
-        cache_instance().set(get_key(login), session)
+        redis_instance().set(get_key(login), session.serialize())
     else:
-        cache_instance().delete(get_key(login))
+        redis_instance().delete(get_key(login))
 
     return get(login)
 
 
 def get(login) -> OmeroSession or None:
-    session = cache_instance().get(get_key(login))
+    session = redis_instance().get(get_key(login))
+    session = OmeroSession.deserialize(session)
 
-    if not (session and isinstance(session, OmeroSession)):
+    if not isinstance(session, OmeroSession):
         return None
 
     timestamp = int(datetime.timestamp(datetime.now()) * 1000)
@@ -68,7 +70,7 @@ def get(login) -> OmeroSession or None:
     if response.status_code == 200 and response.content.decode('utf8').lower() != 'connection failed':
         return session
 
-    cache_instance().delete(get_key(login))
+    redis_instance().delete(get_key(login))
 
     return None
 
@@ -85,4 +87,4 @@ def update_ttl(login):
 
     session.update_active_until(get_active_until())
 
-    cache_instance().set(get_key(login), session)
+    redis_instance().set(get_key(login), session.serialize())

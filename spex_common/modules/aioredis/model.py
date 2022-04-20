@@ -2,7 +2,6 @@ import asyncio
 from aioredis import Redis
 from ...models.RedisEvent import RedisEvent
 
-
 loop = asyncio.get_event_loop()
 
 
@@ -24,6 +23,18 @@ class AIORedisClient:
 
     async def __send(self, key, event: RedisEvent):
         await self.sender.rpush(key, event.serialize())
+
+    async def __set(self, key, value, **kwargs):
+        return await self.sender.set(key, value, **kwargs)
+
+    async def __get(self, key):
+        return await self.receiver.get(key)
+
+    async def __delete(self, *keys):
+        return await self.receiver.delete(*keys)
+
+    async def __keys(self):
+        return await self.receiver.keys()
 
     async def __receive(self, *keys, timeout=0):
         key, raw_msg = await self.receiver.blpop(*keys, timeout=timeout)
@@ -72,3 +83,15 @@ class AIORedisClient:
 
     def close(self):
         loop.run_until_complete(self.__close__())
+
+    def set(self, key, value, **kwargs):
+        return loop.run_until_complete(self.__set(key, value, **kwargs))
+
+    def get(self, key):
+        return loop.run_until_complete(self.__get(key))
+
+    def delete(self, *keys):
+        return loop.run_until_complete(self.__delete(*keys))
+
+    def keys(self):
+        return loop.run_until_complete(self.__keys())

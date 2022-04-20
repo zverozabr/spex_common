@@ -74,24 +74,24 @@ def count():
 
 def recursion_query(itemid, tree, _depth, pipeline_id):
     query = f"""
-FOR doc IN jobs
-FILTER doc._id == @itemid
-RETURN {{
-    id: doc._key, 
-    name: doc.name, 
-    status: doc.status,
-    jobs: (
-        FOR item IN pipeline_direction 
-        FILTER item._from == @itemid 
-            && item.pipeline == @pipeline_id 
+        FOR doc IN jobs
+        FILTER doc._id == @itemid
         RETURN {{
-            name: item.name, 
-            _id: SUBSTITUTE(item._to, "jobs/", ""), 
-            status: item.complete 
+            id: doc._key, 
+            name: doc.name, 
+            status: doc.status,
+            jobs: (
+                FOR item IN pipeline_direction 
+                FILTER item._from == @itemid 
+                    && item.pipeline == @pipeline_id 
+                RETURN {{
+                    name: item.name, 
+                    _id: SUBSTITUTE(item._to, "jobs/", ""), 
+                    status: item.complete 
+                }}
+            )
         }}
-    )
-}}
-"""
+        """
 
     result = db_instance().query(
         query,
@@ -127,7 +127,7 @@ def depth(x):
     return 0
 
 
-def get_jobs(x):
+def get_jobs(x, prefix=True):
     jobs = []
     if not isinstance(x, list):
         return jobs
@@ -135,10 +135,12 @@ def get_jobs(x):
     for job in x:
         if job is None:
             continue
+        if not prefix:
+            jobs.append(job.get("_id", job.get("id")))
+        else:
+            jobs.append(f'jobs/{job.get("_id", job.get("id"))}')
 
-        jobs.append(f'jobs/{job.get("id")}')
-
-        jobs = jobs + get_jobs(job.get('jobs'))
+        jobs = jobs + get_jobs(job.get('jobs'), prefix)
 
     return jobs
 

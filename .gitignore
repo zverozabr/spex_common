@@ -12,4 +12,6 @@
 *key
 *key.pub
 *.egg-info/
-.idea
+.idea/
+build/
+reqlib-metadata/

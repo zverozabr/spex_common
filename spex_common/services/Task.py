@@ -40,6 +40,14 @@ def update(_id, data=None, collection='tasks') -> Task:
     return first_or_none(items, task)
 
 
+def update_tasks(condition=None, data=None, collection=_collectionName, **kwargs) -> list[dict]:
+    search = db_instance().get_search(**kwargs)
+    if condition is not None and search:
+        search = search.replace('==',  condition)
+    items = db_instance().update(collection, data, search, **kwargs)
+    return map_or_none(items, lambda item: task(item).to_json())
+
+
 def delete(_id) -> Task:
     search = 'FILTER doc._key == @value LIMIT 1 '
     items = db_instance().delete(_collectionName, search, value=_id)

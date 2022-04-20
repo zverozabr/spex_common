@@ -1,3 +1,5 @@
+from spex_common.models.Status import Text
+
 class Task:
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
@@ -14,6 +16,7 @@ class Task:
         self.result = kwargs.get('result', '')
 
     def to_json(self) -> dict:
+
         return {
             'omeroId': self.omeroId,
             'name': self.name,
@@ -26,7 +29,8 @@ class Task:
             'id': self.id,
             '_id': self._id,
             'impath': self.impath,
-            'result': self.result
+            'result': self.result,
+            'status_name': Text.from_status(self.status),
         }
 
 
