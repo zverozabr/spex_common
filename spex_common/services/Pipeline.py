@@ -105,11 +105,10 @@ def recursion_query(itemid, tree, _depth, pipeline_id):
     tree = result[0]
     tree['tasks'] = TaskService.select_tasks_edge(itemid)
 
-    i = 0
     if _depth < 50 and tree.get('jobs'):
         for index, job in enumerate(tree['jobs']):
             _id = f'jobs/{job["_id"]}'
-            tree['jobs'][i] = recursion_query(
+            tree['jobs'][index] = recursion_query(
                 _id,
                 job,
                 _depth + 1,

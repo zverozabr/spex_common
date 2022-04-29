@@ -6,8 +6,10 @@ from spex_common.services.Utils import first_or_none, map_or_none
 _collectionName = 'tasks'
 
 
-def select(_id, collection=_collectionName) -> Task:
-    search = 'FILTER doc._key == @value LIMIT 1'
+def select(_id,
+           collection=_collectionName,
+           search='FILTER doc._key == @value LIMIT 1'
+           ) -> Task:
     items = db_instance().select(collection, search, value=_id)
     return first_or_none(items, task)
 
