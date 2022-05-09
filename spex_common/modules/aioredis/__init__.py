@@ -30,6 +30,10 @@ def send_event(event_type: str, data, **kwargs):
 
     event = RedisEvent(event_type, data, **kwargs)
 
-    asyncio\
-        .get_event_loop()\
-        .run_until_complete(client.send(event))
+    loop = asyncio.get_event_loop()
+
+    if loop.is_running():
+        loop.create_task(client.send(event))
+        return
+
+    loop.run_until_complete(client.send(event))

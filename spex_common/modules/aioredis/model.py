@@ -15,6 +15,11 @@ class AIORedisClient:
             'password': password,
             'db': db
         })
+
+        if loop.is_running():
+            loop.create_task(self.__async_init(**kwargs))
+            return
+
         loop.run_until_complete(self.__async_init(**kwargs))
 
     async def __async_init(self, **kwargs):
@@ -37,8 +42,13 @@ class AIORedisClient:
         return await self.receiver.keys()
 
     async def __receive(self, *keys, timeout=0):
-        key, raw_msg = await self.receiver.blpop(*keys, timeout=timeout)
-        return RedisEvent.deserialize(raw_msg)
+        data = await self.receiver.blpop(*keys, timeout=timeout)
+        if data is None:
+            return None
+
+        key, raw_msg = data
+
+        return None if raw_msg is None else RedisEvent.deserialize(raw_msg)
 
     async def wait_for_event(self, timeout=0):
         return await self.__receive(*self._events.keys(), timeout=timeout)
@@ -69,13 +79,14 @@ class AIORedisClient:
         return register
 
     # Run this to wait for and dispatch events
-    async def listen_for_events(self):
+    async def listen_for_events(self, timeout=0):
         while 1:
-            event = await self.wait_for_event()
-            await self.dispatch_event(event)
+            event = await self.wait_for_event(timeout)
+            if event is not None:
+                await self.dispatch_event(event)
 
-    def run(self):
-        loop.run_until_complete(self.listen_for_events())
+    def run(self, timeout=0):
+        loop.run_until_complete(self.listen_for_events(timeout))
 
     async def __close__(self):
         await self.receiver.close()
