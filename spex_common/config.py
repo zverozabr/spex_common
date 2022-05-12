@@ -7,6 +7,20 @@ falses = ['false', 'no']
 int_keys = ['MAX_CONTENT_LENGTH']
 
 
+def _convert_value(key, value):
+    if value:
+        if key.upper() in int_keys:
+            return int(value)
+
+        if type(value) is str and value.lower() in trues:
+            return True
+
+        if type(value) is str and value.lower() in falses:
+            return False
+
+    return value
+
+
 def _get_config(working_dir, mode=None):
     main = f'.{mode}' if mode else ''
 
@@ -32,11 +46,16 @@ def _get_config(working_dir, mode=None):
 
 def load_config(mode='', update_environ=True, working_dir=getcwd()):
     mode = environ.get('MODE', mode)
+    ignore_env_files = environ.get('CONFIG_IGNORE_ENV_FILES', 'False')
+
+    from_env_files = {} if ignore_env_files else {
+        **_get_config(working_dir),
+        **_get_config(working_dir, mode),
+    }
 
     config = {
         **environ.copy(),
-        **_get_config(working_dir),
-        **_get_config(working_dir, mode),
+        **from_env_files,
     }
 
     for key, value in config.items():
@@ -46,16 +65,7 @@ def load_config(mode='', update_environ=True, working_dir=getcwd()):
         if update_environ:
             environ[key] = value if value is not None else environ[key]
 
-        if value:
-            if type(value) is str and value.lower() in trues:
-                value = True
-                config[key] = value
-            elif type(value) is str and value.lower() in falses:
-                value = False
-                config[key] = value
-            elif key.upper() in int_keys:
-                value = int(value)
-                config[key] = value
+        config[key] = _convert_value(key, value)
 
     get_logger('spex.common.config').info(f'uses MODE={mode}')
 
