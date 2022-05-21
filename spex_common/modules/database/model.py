@@ -77,6 +77,8 @@ class ArangoDB:
             db.create_collection('history')
         if not db.has_collection('templates'):
             db.create_collection('templates')
+        if not db.has_collection('waiting_table'):
+            db.create_collection('waiting_table')
         if not db.has_collection('pipeline_direction'):
             db.create_collection('pipeline_direction', edge=True)
         if not db.has_graph('pipeline'):

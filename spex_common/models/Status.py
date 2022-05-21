@@ -2,6 +2,7 @@ from enum import IntEnum
 
 
 class Text(IntEnum):
+    pending = -4
     failed = -3
     pending_approval = -2
     error = -1
