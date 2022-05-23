@@ -58,7 +58,10 @@ class AIORedisClient:
             for handler in self._events[event.type]:
                 loop.create_task(handler(event))
 
-    async def send(self, event: RedisEvent):
+    async def send(self, event: str or RedisEvent, data, **kwargs):
+        if not isinstance(event, RedisEvent):
+            event = RedisEvent(event, data, **kwargs)
+
         await self.__send(event.type, event)
 
     async def wait_for_reply(self, to: RedisEvent, *, timeout=0):
