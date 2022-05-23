@@ -42,7 +42,7 @@ class AIORedisClient:
         return await self.receiver.keys()
 
     async def __receive(self, *keys, timeout=0):
-        data = await self.receiver.blpop(*keys, timeout=timeout)
+        data = await self.receiver.blpop(keys, timeout=timeout)
         if data is None:
             return None
 
@@ -70,14 +70,14 @@ class AIORedisClient:
     async def send_reply(self, to: RedisEvent, reply: RedisEvent):
         await self.__send(to.id, reply)
 
-    def event(self, type: str):
+    def event(self, event_type: str):
         if type not in self._events:
-            self._events[type] = []
+            self._events[event_type] = []
 
         def register(handler):
             if asyncio.iscoroutine(handler):
                 raise ValueError('Handler must be a coroutine.')
-            self._events[type].append(handler)
+            self._events[event_type].append(handler)
 
         return register
 
