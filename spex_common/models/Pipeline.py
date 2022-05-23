@@ -1,4 +1,4 @@
-from spex_common.models.Status import PipelineText as Text
+from spex_common.models.Status import PipelineStatus
 
 
 class Pipeline:
@@ -22,7 +22,7 @@ class Pipeline:
             'id': self.id,
             '_id': self._id,
             'project': self.project,
-            'status_name': Text.from_status(self.status)
+            'status_name': PipelineStatus.from_status(self.status)
         }
 
 

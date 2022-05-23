@@ -1,4 +1,5 @@
-from spex_common.models.Status import Text
+from spex_common.models.Status import TaskStatus
+
 
 class Job:
     def __init__(self, **kwargs):
@@ -19,7 +20,7 @@ class Job:
             'omeroIds': self.omeroIds,
             '_id': self._id,
             'status': self.status,
-            'status_name': Text.from_status(self.status)
+            'status_name': TaskStatus.from_status(self.status)
          }
 
 
