@@ -6,7 +6,8 @@ class TaskStatus(IntEnum):
     failed = -3
     pending_approval = -2
     error = -1
-    started = 0
+    ready = 0
+    started = 1
     in_work = 2
     complete = 100
 

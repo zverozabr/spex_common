@@ -6,18 +6,15 @@ from spex_common.services.Utils import first_or_none, map_or_none
 _collectionName = 'tasks'
 
 
-def select(_id,
-           collection=_collectionName,
-           search='FILTER doc._key == @value LIMIT 1'
-           ) -> Task:
+def select(_id, collection=_collectionName, search='FILTER doc._key == @value LIMIT 1') -> Task:
     items = db_instance().select(collection, search, value=_id)
     return first_or_none(items, task)
 
 
-def select_tasks(condition=None, collection=_collectionName, **kwargs) -> list[dict]:
-    search = db_instance().get_search(**kwargs)
+def select_tasks(condition=None, collection=_collectionName, search=None, **kwargs) -> list[dict]:
+    search = search or db_instance().get_search(**kwargs)
     if condition is not None and search:
-        search = search.replace('==',  condition)
+        search = search.replace('==', condition)
     items = db_instance().select(collection, search, **kwargs)
     return map_or_none(items, lambda item: task(item).to_json())
 
