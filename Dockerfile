@@ -9,6 +9,8 @@ COPY ./common /app/common
 
 WORKDIR /app/common
 
+RUN apt-get update
+
 RUN pip install --upgrade pip
 RUN pip install pipenv
 RUN pip install -r requirements.txt
