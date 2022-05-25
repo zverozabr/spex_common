@@ -1,3 +1,4 @@
+from spex_common.models.Status import TaskStatus
 from spex_common.modules.database import db_instance
 from spex_common.models.Task import task, Task
 from spex_common.services.Utils import first_or_none, map_or_none
@@ -74,7 +75,7 @@ def create_tasks(body, job) -> list[dict]:
             data = dict(body)
             data['omeroId'] = omeroId
             data['parent'] = parent
-            data['status'] = -1
+            data['status'] = body.get('status', TaskStatus.ready.value)
             del data['omeroIds']
 
             new_task = insert(data)
@@ -83,7 +84,7 @@ def create_tasks(body, job) -> list[dict]:
     else:
         data = dict(body)
         data['parent'] = parent
-        data['status'] = -1
+        data['status'] = body.get('status', TaskStatus.ready.value)
         new_task = insert(data)
         if new_task:
             result.append(new_task.to_json())
