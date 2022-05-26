@@ -5,6 +5,7 @@ class History:
         self.date = kwargs.get('date', '')
         self.content = kwargs.get('content', '')
         self.parent = kwargs.get('parent', '')
+        self.event_type = kwargs.get('event_type', '')
 
     def to_json(self):
         return {
@@ -13,6 +14,7 @@ class History:
             'date': self.date,
             'content': self.content,
             'parent': self.parent,
+            'event_type': self.event_type
         }
 
 

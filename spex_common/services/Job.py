@@ -65,8 +65,8 @@ def select_connections(
     return map_or_none(items, to_json)
 
 
-def insert(data, collection='jobs') -> Job or None:
-    item = db_instance().insert(collection, data)
+def insert(data, collection='jobs', history: dict = {}) -> Job or None:
+    item = db_instance().insert(collection, data, None, history)
     return first_or_none([item['new']], job)
 
 
