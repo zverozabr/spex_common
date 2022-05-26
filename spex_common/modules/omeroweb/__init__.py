@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from os import getenv
 from ...models.OmeroSession import OmeroSession
 from ..redis import redis_instance
+from requests import Session
 
 
 __all__ = ['get', 'create', 'update_ttl', 'get_key']
@@ -17,12 +18,15 @@ def get_active_until():
 
 def _login_omero_web(login, password, server='1') -> OmeroSession or None:
     client = OmeroSession(active_until=get_active_until())
-
+   
     response = client.get('/api/v0/token/')
+
 
     data = response.json()
 
     csrf_token = data['data']
+
+
 
     data = {
         'username': login,

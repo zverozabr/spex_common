@@ -15,6 +15,11 @@ class AIORedisClient:
             'password': password,
             'db': db
         })
+
+        if loop.is_running():
+            loop.create_task(self.__async_init(**kwargs))
+            return
+
         loop.run_until_complete(self.__async_init(**kwargs))
 
     async def __async_init(self, **kwargs):
@@ -37,8 +42,13 @@ class AIORedisClient:
         return await self.receiver.keys()
 
     async def __receive(self, *keys, timeout=0):
-        key, raw_msg = await self.receiver.blpop(*keys, timeout=timeout)
-        return RedisEvent.deserialize(raw_msg)
+        data = await self.receiver.blpop(keys, timeout=timeout)
+        if data is None:
+            return None
+
+        key, raw_msg = data
+
+        return None if raw_msg is None else RedisEvent.deserialize(raw_msg)
 
     async def wait_for_event(self, timeout=0):
         return await self.__receive(*self._events.keys(), timeout=timeout)
@@ -48,7 +58,10 @@ class AIORedisClient:
             for handler in self._events[event.type]:
                 loop.create_task(handler(event))
 
-    async def send(self, event: RedisEvent):
+    async def send(self, event: str or RedisEvent, data, **kwargs):
+        if not isinstance(event, RedisEvent):
+            event = RedisEvent(event, data, **kwargs)
+
         await self.__send(event.type, event)
 
     async def wait_for_reply(self, to: RedisEvent, *, timeout=0):
@@ -57,25 +70,26 @@ class AIORedisClient:
     async def send_reply(self, to: RedisEvent, reply: RedisEvent):
         await self.__send(to.id, reply)
 
-    def event(self, type: str):
+    def event(self, event_type: str):
         if type not in self._events:
-            self._events[type] = []
+            self._events[event_type] = []
 
         def register(handler):
             if asyncio.iscoroutine(handler):
                 raise ValueError('Handler must be a coroutine.')
-            self._events[type].append(handler)
+            self._events[event_type].append(handler)
 
         return register
 
     # Run this to wait for and dispatch events
-    async def listen_for_events(self):
+    async def listen_for_events(self, timeout=0):
         while 1:
-            event = await self.wait_for_event()
-            await self.dispatch_event(event)
+            event = await self.wait_for_event(timeout)
+            if event is not None:
+                await self.dispatch_event(event)
 
-    def run(self):
-        loop.run_until_complete(self.listen_for_events())
+    def run(self, timeout=0):
+        loop.run_until_complete(self.listen_for_events(timeout))
 
     async def __close__(self):
         await self.receiver.close()

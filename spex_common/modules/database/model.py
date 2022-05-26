@@ -3,6 +3,8 @@ import ujson
 from arango import ArangoClient
 from arango.database import StandardDatabase, AsyncDatabase
 from arango.job import AsyncJob
+from spex_common.models.History import history
+from datetime import datetime
 
 
 def receive_async_response(task: AsyncJob):
@@ -77,14 +79,26 @@ class ArangoDB:
             db.create_collection('history')
         if not db.has_collection('templates'):
             db.create_collection('templates')
+        if not db.has_collection('waiting_table'):
+            db.create_collection('waiting_table')
         if not db.has_collection('pipeline_direction'):
             db.create_collection('pipeline_direction', edge=True)
         if not db.has_graph('pipeline'):
             pipeline = db.create_graph('pipeline')
             pipeline.create_edge_definition(edge_collection='pipeline_direction', from_vertex_collections=['box', 'pipeline', 'projects'], to_vertex_collections=['tasks', 'box', 'pipeline'])
 
-    def insert(self, collection, data, overwrite_mode=None):
-        return self.instance.insert_document(collection, data, True, overwrite_mode=overwrite_mode)
+    def insert(self, collection, data, overwrite_mode=None, history_content: dict = {}):
+        item = self.instance.insert_document(collection, data, True, overwrite_mode=overwrite_mode)
+        if item and history_content:
+            hist_data = history({})
+            hist_data.content = history_content
+            hist_data.parent = item.get('_id')
+            hist_data.date = datetime.now().isoformat()
+            hist_data.author = item["new"]["author"]
+            hist_data.event_type = 'create_entry'
+            self.instance.insert_document('history', hist_data.to_json(), True, overwrite_mode=None)
+        return item
+
 
     def query(self, query, **kwargs):
         task = self.async_instance.aql.execute(

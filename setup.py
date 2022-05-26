@@ -1,9 +1,20 @@
 #!/usr/bin/env python
 
+import pathlib
+import pkg_resources
 import setuptools
 
 with open("readme.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+with pathlib.Path('requirements.txt').open() as requirements:
+    install_requires = [
+        str(requirement)
+        for requirement
+        in pkg_resources.parse_requirements(requirements)
+    ]
+
+print(install_requires)
 
 setuptools.setup(
     name="spex_common",
@@ -21,14 +32,5 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages(),
     python_requires=">=3.9",
-    install_requires=[
-        "aioredis==2.0.0",
-        "python-dotenv==0.15.0",
-        "python-arango==7.1.0",
-        "requests==2.26.0",
-        "redis==3.5.3",
-        "ujson==4.0.2",
-        "omero-py==5.9.1",
-        "itsdangerous==2.0.1"
-    ]
+    install_requires=install_requires
 )

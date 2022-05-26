@@ -1,3 +1,4 @@
+from spex_common.models.Status import TaskStatus
 from spex_common.modules.database import db_instance
 from spex_common.models.Task import task, Task
 from spex_common.services.Utils import first_or_none, map_or_none
@@ -6,16 +7,15 @@ from spex_common.services.Utils import first_or_none, map_or_none
 _collectionName = 'tasks'
 
 
-def select(_id, collection=_collectionName) -> Task:
-    search = 'FILTER doc._key == @value LIMIT 1'
+def select(_id, collection=_collectionName, search='FILTER doc._key == @value LIMIT 1') -> Task:
     items = db_instance().select(collection, search, value=_id)
     return first_or_none(items, task)
 
 
-def select_tasks(condition=None, collection=_collectionName, **kwargs) -> list[dict]:
-    search = db_instance().get_search(**kwargs)
+def select_tasks(condition=None, collection=_collectionName, search=None, **kwargs) -> list[dict]:
+    search = search or db_instance().get_search(**kwargs)
     if condition is not None and search:
-        search = search.replace('==',  condition)
+        search = search.replace('==', condition)
     items = db_instance().select(collection, search, **kwargs)
     return map_or_none(items, lambda item: task(item).to_json())
 
@@ -75,7 +75,7 @@ def create_tasks(body, job) -> list[dict]:
             data = dict(body)
             data['omeroId'] = omeroId
             data['parent'] = parent
-            data['status'] = -1
+            data['status'] = body.get('status', TaskStatus.ready.value)
             del data['omeroIds']
 
             new_task = insert(data)
@@ -84,7 +84,7 @@ def create_tasks(body, job) -> list[dict]:
     else:
         data = dict(body)
         data['parent'] = parent
-        data['status'] = -1
+        data['status'] = body.get('status', TaskStatus.ready.value)
         new_task = insert(data)
         if new_task:
             result.append(new_task.to_json())

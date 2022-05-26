@@ -1,4 +1,5 @@
-from spex_common.models.Status import Text
+from spex_common.models.Status import TaskStatus
+
 
 class Task:
     def __init__(self, **kwargs):
@@ -14,6 +15,7 @@ class Task:
         self.csvdata = kwargs.get('csvdata', [])
         self.impath = kwargs.get('impath', '')
         self.result = kwargs.get('result', '')
+        self.error = kwargs.get('error')
 
     def to_json(self) -> dict:
 
@@ -30,7 +32,8 @@ class Task:
             '_id': self._id,
             'impath': self.impath,
             'result': self.result,
-            'status_name': Text.from_status(self.status),
+            'status_name': TaskStatus.from_status(self.status),
+            'error': self.error
         }
 
 

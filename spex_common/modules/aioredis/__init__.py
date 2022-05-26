@@ -28,8 +28,10 @@ def aioredis_sender_instance() -> AIORedisClient:
 def send_event(event_type: str, data, **kwargs):
     client = aioredis_sender_instance()
 
-    event = RedisEvent(event_type, data, **kwargs)
+    loop = asyncio.get_event_loop()
 
-    asyncio\
-        .get_event_loop()\
-        .run_until_complete(client.send(event))
+    if loop.is_running():
+        loop.create_task(client.send(event_type, data, **kwargs))
+        return
+
+    loop.run_until_complete(client.send(event_type, data, **kwargs))

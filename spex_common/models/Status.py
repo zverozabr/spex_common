@@ -1,11 +1,13 @@
 from enum import IntEnum
 
 
-class Text(IntEnum):
+class TaskStatus(IntEnum):
+    pending = -4
     failed = -3
     pending_approval = -2
     error = -1
-    started = 0
+    ready = 0
+    started = 1
     in_work = 2
     complete = 100
 
@@ -24,7 +26,7 @@ class Text(IntEnum):
             return -3
 
 
-class PipelineText(IntEnum):
+class PipelineStatus(IntEnum):
     stopped = -3
     pending_approval = -2
     started = 0

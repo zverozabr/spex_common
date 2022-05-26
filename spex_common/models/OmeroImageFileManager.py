@@ -59,10 +59,16 @@ class OmeroImageFileManager:
     def __get_tmp(self) -> str:
         return f'{self.get_filename()}.tmp'
 
+    def __safe_remove(self, path):
+        try:
+            os.remove(path)
+        except Exception as error:
+            self.__logger.error(error)
+
     def remove_chunk(self, chunk_id=None):
         chunks = glob.glob(f'{self.__chunk_path}.{chunk_id or "*"}')
         for chunk in chunks:
-            os.remove(chunk)
+            self.__safe_remove(chunk)
         return self
 
     def clear(self):
@@ -72,7 +78,7 @@ class OmeroImageFileManager:
         self.remove_chunk()
 
         if os.path.exists(self.__get_tmp()):
-            os.remove(self.__get_tmp())
+            self.__safe_remove(self.__get_tmp())
 
         return self
 
@@ -134,13 +140,16 @@ class OmeroImageFileManager:
         return os.path.exists(self.__lock_path)
 
     def lock(self):
+        self.__logger.debug('locking')
         os.makedirs(self.__dir, exist_ok=True)
         open(self.__lock_path, 'a').close()
+        if self.is_locked():
+            self.__logger.debug(f'locked {self.__lock_path}')
         return self
 
     def unlock(self):
         if self.is_locked():
-            os.remove(self.__lock_path)
+            self.__safe_remove(self.__lock_path)
         return self
 
     def is_available(self):
@@ -153,7 +162,7 @@ class OmeroImageFileManager:
 
     def make_available(self):
         if not self.is_available():
-            os.remove(self.__not_available_path)
+            self.__safe_remove(self.__not_available_path)
         return self
 
     def merge_chunks(self):
@@ -168,7 +177,7 @@ class OmeroImageFileManager:
         os.makedirs(self.__dir, exist_ok=True)
 
         if os.path.exists(self.__get_tmp()):
-            os.remove(self.__get_tmp())
+            self.__safe_remove(self.__get_tmp())
 
         chunks = self.__get_chunks(True)
 
@@ -189,7 +198,7 @@ class OmeroImageFileManager:
         size = os.path.getsize(tmp_file)
         if size == self.__expected_file_size:
             if os.path.exists(self.get_filename()):
-                os.remove(self.get_filename())
+                self.__safe_remove(self.get_filename())
             os.rename(tmp_file, self.get_filename())
 
         self.clear()
