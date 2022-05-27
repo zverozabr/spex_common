@@ -24,15 +24,15 @@ def select_jobs(collection='jobs', condition=None, **kwargs) -> list[dict] or No
     return map_or_none(items, lambda item: job(item).to_json())
 
 
-def update(id, collection='jobs', data=None) -> Job or None:
+def update(id, collection='jobs', data=None, history: dict = {}) -> Job or None:
     search = 'FILTER doc._key == @value LIMIT 1 '
-    items = db_instance().update(collection, data, search, value=id)
+    items = db_instance().update(collection, data, search, value=id, history_content=history)
     return first_or_none(items, job)
 
 
 def delete(id, collection='jobs') -> Job or None:
     search = 'FILTER doc._key == @value LIMIT 1 '
-    items = db_instance().delete(collection, search, value=id)
+    items = db_instance().delete(collection, search, value=id, add_to_hist=True)
     return first_or_none(items, job)
 
 
@@ -75,8 +75,8 @@ def count(collection='jobs') -> int:
     return arr[0]
 
 
-def update_job(id, data) -> dict or None:
-    _job = update(id=id, data=data)
+def update_job(id, data, history: dict = {}) -> dict or None:
+    _job = update(id=id, data=data, history=history)
 
     if _job is None:
         return None
