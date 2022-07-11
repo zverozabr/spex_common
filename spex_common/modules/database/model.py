@@ -115,7 +115,7 @@ class ArangoDB:
             **kwargs
         )
 
-    def update(self, collection, data, search='', **kwargs):
+    def update(self, collection, data, search='', history_content: dict = {}, **kwargs):
         task = self.async_instance.aql.execute(
             f'FOR doc IN {collection}'
             f' {search}'
@@ -126,20 +126,44 @@ class ArangoDB:
                 **kwargs
             }
         )
-        return receive_async_response(task)
+        item = receive_async_response(task)
+        if item and history_content:
+            one_item = item[0]
+            hist_data = history({})
+            hist_data.content = history_content
+            hist_data.parent = one_item.get('_id')
+            hist_data.date = datetime.now().isoformat()
+            hist_data.author = one_item["author"]
+            hist_data.event_type = 'update_entry'
+            self.instance.insert_document('history', hist_data.to_json(), True, overwrite_mode=None)
 
-    def delete(self, collection, search='', **kwargs):
+        return item
+
+    def delete(self, collection, search='', add_to_hist=False, **kwargs):
         task = self.async_instance.aql.execute(
             f'FOR doc IN {collection}'
             f' {search}'
             f' REMOVE doc IN {collection} '
             f' LET deleted = OLD '
-            f' RETURN UNSET(deleted, "_rev", "password") ',
+            f' RETURN deleted ',
+            # f' UNSET("_rev", "password") ',
             bind_vars={
                 **kwargs
             }
         )
-        return receive_async_response(task)
+        items = receive_async_response(task)
+        if items and add_to_hist:
+            one_item = items[0]
+            hist_data = history({})
+            hist_data.parent = one_item.get("_id")
+            hist_data.date = datetime.now().isoformat()
+            hist_data.author = one_item["author"]
+            hist_data.event_type = 'delete_entry'
+            self.instance.insert_document('history', hist_data.to_json(), True, overwrite_mode=None)
+        for item in items:
+            item.pop('_rev', None)
+            item.pop('password', None)
+        return items
 
     def count(self, collection, search='', **kwargs):
         task = self.async_instance.aql.execute(
